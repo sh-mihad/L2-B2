@@ -1,16 +1,13 @@
-import dotenv from 'dotenv'
-import express from 'express'
+import app from "./app"
+import { initDB } from "./db"
 
-const app = express()
-dotenv.config()
-const port = 9000
+const port = process.env.PORT as string
 
-const env = process.env.port
-console.log("env port",env);
-app.get('/', (req, res) => {
-  res.send('Hello World!')
-})
-
-app.listen(port, () => {
+function main (){
+  initDB()
+  app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)
 })
+}
+
+main()
