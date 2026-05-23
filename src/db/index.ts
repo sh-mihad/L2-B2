@@ -1,6 +1,6 @@
 import { Pool } from "pg";
 export const pool = new Pool({
-  connectionString: process.env.DB_CONNECTION_STRING,
+  connectionString:'postgresql://neondb_owner:npg_gGST2D5WvoBb@ep-empty-cherry-aqn30zn9-pooler.c-8.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require',
 });
 
 export const initDB = async () => {
@@ -9,9 +9,9 @@ export const initDB = async () => {
          CREATE TABLE IF NOT EXISTS users (
           id SERIAL PRIMARY KEY,
           name VARCHAR(20) NOT NULL,
-          email VARCHAR(20) UNIQUE NOT NULL,
-          password VARCHAR(8) NOT NULL,
-          role VARCHAR(5) NOT NULL,
+          email VARCHAR(40) UNIQUE NOT NULL,
+          password TEXT NOT NULL,
+          role VARCHAR(20) NOT NULL,
           created_at TIMESTAMP DEFAULT now(),
           updated_at TIMESTAMP DEFAULT now()
          )
