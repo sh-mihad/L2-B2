@@ -19,13 +19,13 @@ const signup = async (req: Request, res: Response) => {
     });
   }
 };
-const loginUser = async (req: Request, res: Response) => {
+const login = async (req: Request, res: Response) => {
   const payload = req.body;
   try {
-    const signupUser = await authService.signupUser(payload);
+    const signupUser = await authService.loginUser(payload);
     res.status(201).json({
       success: true,
-      message: "User registered successfully",
+      message: "User login successful",
       data: signupUser,
     });
   } catch (error:any) {
@@ -39,4 +39,5 @@ const loginUser = async (req: Request, res: Response) => {
 
 export const authController = {
   signup,
+  login
 };

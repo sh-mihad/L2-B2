@@ -1,11 +1,12 @@
-import { hash } from "bcrypt";
+import { compare, hash } from "bcrypt";
+import jwt from "jsonwebtoken";
+import { JWT_KEY, SALT_ROUND } from "../../constent";
 import { pool } from "../../db";
 import type { IUser } from "./auth.interface";
 const signupUser = async (payload: IUser) => {
   const { name, email, password, role } = payload;
-  console.log("stingPss",password.toString());
   try {
-    const hashPassword =await hash(password.toString(),10) //slat need to move .env
+    const hashPassword =await hash(password.toString(),SALT_ROUND) 
     const query = `
   INSERT INTO users (name, email, password, role)
   VALUES ($1, $2, $3, $4)
@@ -23,7 +24,30 @@ const signupUser = async (payload: IUser) => {
 };
 
 const loginUser = async(payload:{email:string,password:string})=>{
-  console.log("login api");
+  const {email,password} = payload;
+  try {
+    const userResult = await pool.query(`
+          SELECT * FROM users WHERE email=$1
+      `,[email])
+    if(userResult?.rowCount === 0){
+      throw new Error("Wrong credentials")
+    }
+    const user = userResult.rows[0];
+    const isCorrectPassword = await compare(password, user.password);
+    if(!isCorrectPassword){
+      throw new Error("In correct password")
+    }
+
+    const token = jwt.sign(user,JWT_KEY)
+    const {password:userPassword,...restInfo}=user
+    return {
+     token,
+     user:restInfo
+    }
+    
+  } catch (error) {
+    throw error
+  }
 }
 
 
