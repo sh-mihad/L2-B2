@@ -1,6 +1,8 @@
 import express from "express";
 import { pool } from "./db";
+import globalErrorMiddleware from "./middleware/globaEerrorMiddleware";
 import { authRouter } from "./modules/auth/auth.route";
+import { issueRoute } from "./modules/issue/issue.route";
 
 const app = express();
 app.use(express.json());
@@ -10,6 +12,8 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/auth", authRouter);
+app.use("/api/issues", issueRoute);
+app.use(globalErrorMiddleware)
 app.get("/api/users", async (req, res) => {
   try {
     const result = await pool.query(`
