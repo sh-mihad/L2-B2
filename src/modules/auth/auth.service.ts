@@ -38,7 +38,7 @@ const loginUser = async(payload:{email:string,password:string})=>{
       throw new Error("In correct password")
     }
 
-    const token = jwt.sign(user,JWT_KEY)
+    const token = jwt.sign(user,JWT_KEY,{ expiresIn: '5h'})
     const {password:userPassword,...restInfo}=user
     return {
      token,
