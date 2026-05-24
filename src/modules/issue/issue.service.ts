@@ -77,6 +77,9 @@ const getSingleIssue = async (postId: string | number) => {
     const issueResult = await pool.query(`SELECT * FROM issues WHERE id=$1`, [
       postId,
     ]);
+    if(!issueResult.rows[0] ){
+      return null
+    }
     const reportersResult = await pool.query(
       `
     SELECT id,name,role FROM users
@@ -148,9 +151,44 @@ const updateIssue = async (req: Request, payload: IIssue, postId: string) => {
     throw error;
   }
 };
+const deleteIssue = async (req: Request, postId: string) => {
+  const user = req.user;
+  try {
+    const getIssueResult = await pool.query(
+      `
+      SELECT * FROM issues WHERE id=$1
+      `,
+      [postId],
+    );
+    const singleIssue = getIssueResult.rows[0];
+    // check the status
+    if (!singleIssue?.id) {
+      throw new Error(
+        "No issue found!",
+      );
+    }
+    // check user role
+    if (user && user.role === "maintainer") {
+      const result = await pool.query(
+        `
+            DELETE FROM issues
+            WHERE id=$1
+            `,
+        [postId],
+      );
+      return result.rows[0];
+    }
+    else{
+      throw new Error('You are not allowed for delete this issue!')
+    }
+  } catch (error) {
+    throw error;
+  }
+};
 export const issueService = {
   createIssue,
   getAllIssues,
   getSingleIssue,
   updateIssue,
+  deleteIssue
 };

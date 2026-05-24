@@ -9,6 +9,7 @@ router.post('/',authMiddleware,userRoleMiddleware,issueController.createIssue)
 router.get('/',issueController.getAllIssues)
 router.get('/:id',issueController.getSingleIssue)
 router.put('/:id',authMiddleware,issueController.updateIssue)
+router.delete('/:id',authMiddleware,issueController.deleteIssue)
 
 
 export const issueRoute = router
