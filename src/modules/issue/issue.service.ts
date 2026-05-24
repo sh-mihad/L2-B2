@@ -19,32 +19,55 @@ const createIssue = async (req: Request, payload: IIssue) => {
     throw error;
   }
 };
-const getAllIssues = async (sort:string='newest',type:string='',status:string='') => {
-    console.log("type",type);
-    console.log("sort",sort);
-    console.log("status",status);
-  let orderBy = sort === "newest" ? "DESC": "ASC" 
+const getAllIssues = async (
+  sort: string | undefined = "newest",
+  type: string | undefined,
+  status: string | undefined,
+) => {
+  let orderBy = sort === "newest" ? "DESC" : "ASC";
+  const filters: any = [];
+  const values: any = [];
+  if (type) {
+    values.push(type);
+    filters.push(`type=$${values.length}`);
+  }
+  if (status) {
+    values.push(status);
+    filters.push(`status=$${values.length}`);
+  }
+
+  const filterQuery =
+    filters?.length > 0 ? ` WHERE ${filters.join(" AND ")}` : "";
   try {
-    const issueResult = await pool.query(`
+    const issueResult = await pool.query(
+      `
             SELECT * FROM issues 
-            `,[orderBy]);
-   const reportersResult =await pool.query(`
+           ${filterQuery}
+             ORDER BY created_at ${orderBy} 
+            `,
+      values,
+    );
+    const reportersResult = await pool.query(
+      `
     SELECT id,name,role FROM users
      WHERE id = ANY($1)
-    `,[issueResult.rows.map((item:any)=>item.reporter_id)])
+    `,
+      [issueResult.rows.map((item: any) => item.reporter_id)],
+    );
 
-    const allIssues= issueResult.rows;
-    const reporters = reportersResult.rows
-    const combinedData = allIssues.map((item=>{
-        const {reporter_id,...restValues} = item
-        return {
-            ...restValues,
-            // reporter:reporters.some((user:any)=>user.id === item.reporter_id)?
-            reporter:reporters.find((reporter:any)=>reporter.id === reporter_id) ?? null
-
-        }
-    }))
-    return combinedData || []
+    const allIssues = issueResult.rows;
+    const reporters = reportersResult.rows;
+    const combinedData = allIssues.map((item) => {
+      const { reporter_id, ...restValues } = item;
+      return {
+        ...restValues,
+        // reporter:reporters.some((user:any)=>user.id === item.reporter_id)?
+        reporter:
+          reporters.find((reporter: any) => reporter.id === reporter_id) ??
+          null,
+      };
+    });
+    return combinedData || [];
   } catch (error) {
     throw error;
   }

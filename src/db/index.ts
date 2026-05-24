@@ -24,6 +24,7 @@ export const initDB = async () => {
           description TEXT NOT NULL,
           type VARCHAR(20) NOT NULL ,
           reporter_id INT,
+          status VARCHAR(30) DEFAULT 'open',
           created_at TIMESTAMP DEFAULT now(),
           updated_at TIMESTAMP DEFAULT now()
          )

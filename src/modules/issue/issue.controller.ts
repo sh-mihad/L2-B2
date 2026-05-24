@@ -20,10 +20,10 @@ const createIssue = async(req:Request,res:Response)=>{
      }
 }
 const getAllIssues = async(req:Request,res:Response)=>{
-    const {sort,status,type} = req.query
+    const {sort,status,type} = req.query 
    
     try {
-        const result = await issueService.getAllIssues(sort as string,status as string,type as string)
+        const result = await issueService.getAllIssues(sort as string,type as string,status as string)
          res.status(200).json({
          success: true,
          data: result,
