@@ -1,3 +1,4 @@
+import cors from 'cors';
 import express from "express";
 import { pool } from "./db";
 import globalErrorMiddleware from "./middleware/globaEerrorMiddleware";
@@ -6,6 +7,7 @@ import { issueRoute } from "./modules/issue/issue.route";
 
 const app = express();
 app.use(express.json());
+app.use(cors())
 
 app.get("/", (req, res) => {
   res.send("Welcome to the DevPulse  app");
