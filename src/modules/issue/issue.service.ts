@@ -14,13 +14,43 @@ const createIssue = async (req: Request, payload: IIssue) => {
             `,
       [title, description, type, user?.id],
     );
-    return result.rows[0]
+    return result.rows[0];
   } catch (error) {
-    throw error
+    throw error;
+  }
+};
+const getAllIssues = async (sort:string='newest',type:string='',status:string='') => {
+    console.log("type",type);
+    console.log("sort",sort);
+    console.log("status",status);
+  let orderBy = sort === "newest" ? "DESC": "ASC" 
+  try {
+    const issueResult = await pool.query(`
+            SELECT * FROM issues 
+            `,[orderBy]);
+   const reportersResult =await pool.query(`
+    SELECT id,name,role FROM users
+     WHERE id = ANY($1)
+    `,[issueResult.rows.map((item:any)=>item.reporter_id)])
+
+    const allIssues= issueResult.rows;
+    const reporters = reportersResult.rows
+    const combinedData = allIssues.map((item=>{
+        const {reporter_id,...restValues} = item
+        return {
+            ...restValues,
+            // reporter:reporters.some((user:any)=>user.id === item.reporter_id)?
+            reporter:reporters.find((reporter:any)=>reporter.id === reporter_id) ?? null
+
+        }
+    }))
+    return combinedData || []
+  } catch (error) {
+    throw error;
   }
 };
 
-
-export const userService ={
-    createIssue
-}
+export const issueService = {
+  createIssue,
+  getAllIssues,
+};
