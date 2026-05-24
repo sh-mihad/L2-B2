@@ -72,8 +72,85 @@ const getAllIssues = async (
     throw error;
   }
 };
+const getSingleIssue = async (postId: string | number) => {
+  try {
+    const issueResult = await pool.query(`SELECT * FROM issues WHERE id=$1`, [
+      postId,
+    ]);
+    const reportersResult = await pool.query(
+      `
+    SELECT id,name,role FROM users
+     WHERE id =$1
+    `,
+      [issueResult.rows[0].reporter_id],
+    );
+    const { reporter_id, ...restValues } = issueResult.rows[0];
+    return {
+      ...restValues,
+      reporter: reportersResult.rows[0],
+    };
+  } catch (error) {
+    throw error;
+  }
+};
+const updateIssue = async (req: Request, payload: IIssue, postId: string) => {
+  const { description, title, type, status } = payload;
 
+  const user = req.user;
+  try {
+    const getIssueResult = await pool.query(
+      `
+      SELECT * FROM issues WHERE id=$1
+      `,
+      [postId],
+    );
+    const singleIssue = getIssueResult.rows[0];
+    // check the status
+    if (singleIssue.status !== "open") {
+      throw new Error(
+        "Only open status issue will update.This issue is not allowed for update!",
+      );
+    }
+    // check user role
+    if (user && user.role === "maintainer") {
+      console.log("inside the user role maintainer");
+      const result = await pool.query(
+        `
+            UPDATE issues
+            SET 
+              title=COALESCE($1,title),
+              description=COALESCE($2,description),
+              type=COALESCE($3,type),
+              status=COALESCE($4,status)
+            RETURNING * 
+            `,
+        [title, description, type, status],
+      );
+      return result.rows[0];
+    }else if (user && user.role === "contributor" && singleIssue.reporter_id === user.id){
+       const result = await pool.query(
+        `
+            UPDATE issues
+            SET 
+              title=COALESCE($1,title),
+              description=COALESCE($2,description),
+              type=COALESCE($3,type),
+              status=COALESCE($4,status)
+            RETURNING * 
+            `,
+        [title, description, type, status],
+      );
+      return result.rows[0];
+    }else{
+      throw new Error('You are not allowed for update this issue!')
+    }
+  } catch (error) {
+    throw error;
+  }
+};
 export const issueService = {
   createIssue,
   getAllIssues,
+  getSingleIssue,
+  updateIssue,
 };

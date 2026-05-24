@@ -1,5 +1,6 @@
 export interface IIssue{
     title:string;
     description:string;
-    type:string
+    type:string;
+    status?:string
 }
