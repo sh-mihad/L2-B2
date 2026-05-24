@@ -108,6 +108,9 @@ const updateIssue = async (req: Request, payload: IIssue, postId: string) => {
       [postId],
     );
     const singleIssue = getIssueResult.rows[0];
+    if(!singleIssue){
+      throw new Error("Issue not found!")
+    }
     // check the status
     if (singleIssue.status !== "open") {
       throw new Error(
