@@ -4,6 +4,7 @@
   "description": "",
   "main": "server.js",
   "scripts": {
+    "vercel-build": "npm run build",
     "start": "node ./dist/server.js",
     "dev": "tsx --watch ./src/server.ts",
     "build": "tsup",
